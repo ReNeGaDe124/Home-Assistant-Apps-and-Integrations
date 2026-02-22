@@ -1,7 +1,7 @@
 ---
 version: 2.7.2
 slug: mariadb-nextcloud
-name: MariaDB Nextcloud
+name: MariaDB - Nextcloud
 description: A SQL database server
 url: https://github.com/home-assistant/addons/tree/master/mariadb
 arch:
