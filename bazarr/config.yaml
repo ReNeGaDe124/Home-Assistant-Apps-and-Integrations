@@ -1,12 +1,11 @@
 ---
 name: Bazarr
-version: 1.0.0.0
+version: dev
 slug: bazarr
 description: Download and manage subtitles for Sonarr and Radarr
 url: https://github.com/hassio-addons/addon-bazarr/tree/main/README.md
 webui: http://[HOST]:[PORT:6767]
 ingress: true
-ingress_port: 8099
 panel_icon: mdi:subtitles
 init: false
 arch:
