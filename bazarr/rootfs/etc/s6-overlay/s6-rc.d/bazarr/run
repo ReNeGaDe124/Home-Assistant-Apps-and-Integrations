@@ -6,28 +6,24 @@
 # ==============================================================================
 bashio::log.info 'Starting Bazarr...'
 
-INGRESS_PORT=$(bashio::addon.ingress_port)
 INGRESS_ENTRY=$(bashio::addon.ingress_entry)
-
-bashio::log.info "Ingress port: ${INGRESS_PORT}"
 bashio::log.info "Ingress entry: ${INGRESS_ENTRY}"
 
 # Configure Bazarr base URL for ingress path in config.yaml
 CFG_PATH="/config/config/config.yaml"
 
 if [ -f "${CFG_PATH}" ]; then
-    python3 - <<EOF
+    python3 - <<PYEOF
 import re
 
 with open('${CFG_PATH}', 'r') as f:
     content = f.read()
 
-# Replace base_url only inside the general section (first occurrence only)
 updated = re.sub(r'(general:.*?base_url:)[^\n]*', r'\g<1> ${INGRESS_ENTRY}', content, count=1, flags=re.DOTALL)
 
 with open('${CFG_PATH}', 'w') as f:
     f.write(updated)
-EOF
+PYEOF
     bashio::log.info "Updated base_url to: ${INGRESS_ENTRY}"
 else
     bashio::log.warning "config.yaml not found, Bazarr will create it on first run"
@@ -35,5 +31,4 @@ fi
 
 python3 /opt/bin/bazarr.py \
     --no-update \
-    --config /config \
-    --port "${INGRESS_PORT}"
+    --config /config
