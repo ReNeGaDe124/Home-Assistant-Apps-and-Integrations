@@ -12,19 +12,32 @@ INGRESS_ENTRY=$(bashio::addon.ingress_entry)
 bashio::log.info "Ingress port: ${INGRESS_PORT}"
 bashio::log.info "Ingress entry: ${INGRESS_ENTRY}"
 
-# Configure Bazarr base URL for ingress path
+# Configure Bazarr base URL for ingress path (trailing slash required)
 python3 - <<EOF
 import configparser, os
+
 cfg = configparser.ConfigParser()
 cfg_path = '/config/config/config.ini'
 os.makedirs(os.path.dirname(cfg_path), exist_ok=True)
+
 if os.path.exists(cfg_path):
     cfg.read(cfg_path)
+
 if not cfg.has_section('general'):
     cfg.add_section('general')
-cfg.set('general', 'base_url', '${INGRESS_ENTRY}')
+
+# Bazarr requires a trailing slash on base_url
+base_url = '${INGRESS_ENTRY}'
+if not base_url.endswith('/'):
+    base_url += '/'
+
+cfg.set('general', 'base_url', base_url)
+
 with open(cfg_path, 'w') as f:
     cfg.write(f)
+
+print(f"Set base_url to: {base_url}")
+print(f"Config written to: {cfg_path}")
 EOF
 
 python3 /opt/bin/bazarr.py \
