@@ -16,8 +16,8 @@ bashio::log.info "Ingress entry: ${INGRESS_ENTRY}"
 CFG_PATH="/config/config/config.yaml"
 
 if [ -f "${CFG_PATH}" ]; then
-    # Update existing base_url line
-    sed -i "s|  base_url:.*|  base_url: ${INGRESS_ENTRY}|" "${CFG_PATH}"
+    # Replace base_url only on the first occurrence (in the general section)
+    sed -i "0,/  base_url:.*/s|  base_url:.*|  base_url: ${INGRESS_ENTRY}|" "${CFG_PATH}"
     bashio::log.info "Updated base_url to: ${INGRESS_ENTRY}"
 else
     bashio::log.warning "config.yaml not found, Bazarr will create it on first run"
