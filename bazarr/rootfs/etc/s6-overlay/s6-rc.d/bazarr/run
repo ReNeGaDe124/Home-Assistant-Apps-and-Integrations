@@ -16,8 +16,18 @@ bashio::log.info "Ingress entry: ${INGRESS_ENTRY}"
 CFG_PATH="/config/config/config.yaml"
 
 if [ -f "${CFG_PATH}" ]; then
-    # Replace base_url only on the first occurrence (in the general section)
-    sed -i "0,/  base_url:.*/s|  base_url:.*|  base_url: ${INGRESS_ENTRY}|" "${CFG_PATH}"
+    python3 - <<EOF
+import re
+
+with open('${CFG_PATH}', 'r') as f:
+    content = f.read()
+
+# Replace base_url only inside the general section (first occurrence only)
+updated = re.sub(r'(general:.*?base_url:)[^\n]*', r'\g<1> ${INGRESS_ENTRY}', content, count=1, flags=re.DOTALL)
+
+with open('${CFG_PATH}', 'w') as f:
+    f.write(updated)
+EOF
     bashio::log.info "Updated base_url to: ${INGRESS_ENTRY}"
 else
     bashio::log.warning "config.yaml not found, Bazarr will create it on first run"
