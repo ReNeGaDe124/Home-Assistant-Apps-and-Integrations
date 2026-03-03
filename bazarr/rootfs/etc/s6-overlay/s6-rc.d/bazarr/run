@@ -13,28 +13,15 @@ bashio::log.info "Ingress port: ${INGRESS_PORT}"
 bashio::log.info "Ingress entry: ${INGRESS_ENTRY}"
 
 # Configure Bazarr base URL for ingress path in config.yaml
-python3 - <<EOF
-import yaml, os
+CFG_PATH="/config/config/config.yaml"
 
-cfg_path = '/config/config/config.yaml'
-os.makedirs(os.path.dirname(cfg_path), exist_ok=True)
-
-cfg = {}
-if os.path.exists(cfg_path):
-    with open(cfg_path, 'r') as f:
-        cfg = yaml.safe_load(f) or {}
-
-if 'general' not in cfg:
-    cfg['general'] = {}
-
-cfg['general']['base_url'] = '${INGRESS_ENTRY}'
-
-with open(cfg_path, 'w') as f:
-    yaml.dump(cfg, f, default_flow_style=False, allow_unicode=True)
-
-print(f"Set base_url to: ${INGRESS_ENTRY}")
-print(f"Config written to: {cfg_path}")
-EOF
+if [ -f "${CFG_PATH}" ]; then
+    # Update existing base_url line
+    sed -i "s|  base_url:.*|  base_url: ${INGRESS_ENTRY}|" "${CFG_PATH}"
+    bashio::log.info "Updated base_url to: ${INGRESS_ENTRY}"
+else
+    bashio::log.warning "config.yaml not found, Bazarr will create it on first run"
+fi
 
 python3 /opt/bin/bazarr.py \
     --no-update \
