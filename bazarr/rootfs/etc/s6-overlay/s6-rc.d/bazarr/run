@@ -12,31 +12,27 @@ INGRESS_ENTRY=$(bashio::addon.ingress_entry)
 bashio::log.info "Ingress port: ${INGRESS_PORT}"
 bashio::log.info "Ingress entry: ${INGRESS_ENTRY}"
 
-# Configure Bazarr base URL for ingress path (trailing slash required)
+# Configure Bazarr base URL for ingress path in config.yaml
 python3 - <<EOF
-import configparser, os
+import yaml, os
 
-cfg = configparser.ConfigParser()
-cfg_path = '/config/config/config.ini'
+cfg_path = '/config/config/config.yaml'
 os.makedirs(os.path.dirname(cfg_path), exist_ok=True)
 
+cfg = {}
 if os.path.exists(cfg_path):
-    cfg.read(cfg_path)
+    with open(cfg_path, 'r') as f:
+        cfg = yaml.safe_load(f) or {}
 
-if not cfg.has_section('general'):
-    cfg.add_section('general')
+if 'general' not in cfg:
+    cfg['general'] = {}
 
-# Bazarr requires a trailing slash on base_url
-base_url = '${INGRESS_ENTRY}'
-if not base_url.endswith('/'):
-    base_url += '/'
-
-cfg.set('general', 'base_url', base_url)
+cfg['general']['base_url'] = '${INGRESS_ENTRY}'
 
 with open(cfg_path, 'w') as f:
-    cfg.write(f)
+    yaml.dump(cfg, f, default_flow_style=False, allow_unicode=True)
 
-print(f"Set base_url to: {base_url}")
+print(f"Set base_url to: ${INGRESS_ENTRY}")
 print(f"Config written to: {cfg_path}")
 EOF
 
