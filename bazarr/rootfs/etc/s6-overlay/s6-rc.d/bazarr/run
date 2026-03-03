@@ -1,0 +1,34 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Home Assistant Community Add-on: Bazarr
+# Runs Bazarr
+# ==============================================================================
+bashio::log.info 'Starting Bazarr...'
+
+INGRESS_PORT=$(bashio::addon.ingress_port)
+INGRESS_ENTRY=$(bashio::addon.ingress_entry)
+
+bashio::log.info "Ingress port: ${INGRESS_PORT}"
+bashio::log.info "Ingress entry: ${INGRESS_ENTRY}"
+
+# Configure Bazarr base URL for ingress path
+python3 - <<EOF
+import configparser, os
+cfg = configparser.ConfigParser()
+cfg_path = '/config/config/config.ini'
+os.makedirs(os.path.dirname(cfg_path), exist_ok=True)
+if os.path.exists(cfg_path):
+    cfg.read(cfg_path)
+if not cfg.has_section('general'):
+    cfg.add_section('general')
+cfg.set('general', 'base_url', '${INGRESS_ENTRY}')
+with open(cfg_path, 'w') as f:
+    cfg.write(f)
+EOF
+
+python3 /opt/bin/bazarr.py \
+    --no-update \
+    --config /config \
+    --port "${INGRESS_PORT}" \
+    --host "127.0.0.1"
