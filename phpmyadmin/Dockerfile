@@ -1,5 +1,12 @@
-ARG BUILD_FROM
+# Build Arch
+ARG BUILD_ARCH=amd64
+ARG BUILD_FROM=ghcr.io/hassio-addons/phpmyadmin/${BUILD_ARCH}:stable
 FROM ${BUILD_FROM}
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+RUN echo "Docker builder running on $BUILDPLATFORM, building for $TARGETPLATFORM"
 
 # Copy root filesystem
 COPY rootfs /
@@ -18,7 +25,7 @@ LABEL \
     io.hass.name="${BUILD_NAME}" \
     io.hass.description="${BUILD_DESCRIPTION}" \
     io.hass.arch="${BUILD_ARCH}" \
-    io.hass.type="addon" \
+    io.hass.type="app" \
     io.hass.version=${BUILD_VERSION} \
     maintainer="Andrew J.Swan <andrewjswan@addons.community>" \
     org.opencontainers.image.title="${BUILD_NAME}" \
