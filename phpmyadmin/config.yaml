@@ -1,7 +1,7 @@
 ---
-name: phpMyAdmin
+name: phpMyAdmin - Nextcloud
 version: 2026.4.3
-slug: phpmyadmin
+slug: phpmyadmin-nextcloud
 description: A web interface for the MariaDB / MySQL
 url: https://github.com/andrewjswan/phpmyadmin-addon
 
